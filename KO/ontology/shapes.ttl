@@ -1,0 +1,193 @@
+@prefix rcpp: <https://example.org/rcpp#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+rcpp:ValidationStatusShape a sh:NodeShape ; sh:targetSubjectsOf rcpp:validationStatus ;
+ sh:property [ sh:path rcpp:validationStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("confirmed" "provisional") ; sh:message "검증 상태는 confirmed 또는 provisional이어야 한다."@ko ] .
+
+rcpp:DocumentShape a sh:NodeShape ; sh:targetClass rcpp:ProgressDocument ;
+ sh:property [ sh:path rcpp:documentIdentifier ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:message "서류 식별자가 필요하다."@ko ] .
+
+rcpp:RoundShape a sh:NodeShape ; sh:targetClass rcpp:ProgressPaymentRound ;
+ sh:property [ sh:path rcpp:roundNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ; sh:message "1 이상의 회차 번호가 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:previousProgressRound ; sh:maxCount 1 ; sh:class rcpp:ProgressPaymentRound ; sh:message "이전 기성회차는 최대 하나여야 한다."@ko ] ;
+ sh:sparql [ sh:message "2회차 이상에는 이전 기성회차가 정확히 하나 필요하다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:roundNumber ?n . FILTER (?n > 1) FILTER NOT EXISTS { $this rcpp:previousProgressRound ?previous } }" ] ;
+ sh:sparql [ sh:message "previousProgressRound는 정확히 직전 번호의 회차여야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:roundNumber ?n ; rcpp:previousProgressRound ?previous . ?previous rcpp:roundNumber ?pn . FILTER (?pn + 1 != ?n) }" ] .
+
+rcpp:DocumentItemShape a sh:NodeShape ; sh:targetClass rcpp:DocumentItem ;
+ sh:property [ sh:path rcpp:itemName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:message "항목명이 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:containsItem ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ProgressDocument ; sh:message "각 서류항목은 정확히 하나의 기성서류에 포함돼야 한다."@ko ] .
+
+rcpp:QuantityCalculationSheetShape a sh:NodeShape ; sh:targetClass rcpp:QuantityCalculationSheet ; sh:property [ sh:path rcpp:containsItem ; sh:minCount 1 ; sh:class rcpp:CalculatedQuantityItem ; sh:message "수량산출서는 수량산출항목만 포함해야 한다."@ko ] .
+rcpp:ContractStatementShape a sh:NodeShape ; sh:targetClass rcpp:ContractStatement ; sh:property [ sh:path rcpp:containsItem ; sh:minCount 1 ; sh:class rcpp:ContractItem ; sh:message "계약내역서는 계약항목만 포함해야 한다."@ko ] .
+rcpp:CostCalculationStatementShape a sh:NodeShape ; sh:targetClass rcpp:CostCalculationStatement ; sh:property [ sh:path rcpp:containsItem ; sh:minCount 1 ; sh:class rcpp:CostCalculationItem ; sh:message "원가계산서는 원가계산항목만 포함해야 한다."@ko ] .
+rcpp:WorkTypeDetailStatementShape a sh:NodeShape ; sh:targetClass rcpp:WorkTypeDetailStatement ; sh:property [ sh:path rcpp:containsItem ; sh:minCount 1 ; sh:class rcpp:WorkTypeDetailItem ; sh:message "공종별내역서는 공종별내역항목만 포함해야 한다."@ko ] .
+rcpp:WorkTypeSummaryStatementShape a sh:NodeShape ; sh:targetClass rcpp:WorkTypeSummaryStatement ; sh:property [ sh:path rcpp:containsItem ; sh:minCount 1 ; sh:class rcpp:ContractSummaryItem ; sh:message "공종별집계표는 계약집계항목만 포함해야 한다."@ko ] .
+rcpp:ProgressPaymentStatementShape a sh:NodeShape ; sh:targetClass rcpp:ProgressPaymentStatement ;
+ sh:property [ sh:path rcpp:belongsToProgressRound ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ProgressPaymentRound ; sh:message "공사기성부분내역서에는 기성회차가 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:containsItem ; sh:qualifiedValueShape [ sh:class rcpp:CurrentProgressQuantityItem ] ; sh:qualifiedMinCount 1 ; sh:message "공사기성부분내역서에는 금회기성수량항목이 하나 이상 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:containsItem ; sh:qualifiedValueShape [ sh:class rcpp:ProgressItem ] ; sh:qualifiedMinCount 1 ; sh:message "공사기성부분내역서에는 기성금액항목이 하나 이상 필요하다."@ko ] ;
+ sh:sparql [ sh:message "공사기성부분내역서는 금회수량·기성금액·기성집계 항목만 포함해야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:containsItem ?item . FILTER NOT EXISTS { ?item a ?type . FILTER (?type IN (rcpp:CurrentProgressQuantityItem, rcpp:ProgressItem, rcpp:ProgressSummaryItem)) } }" ] .
+
+rcpp:CostItemShape a sh:NodeShape ; sh:targetClass rcpp:CostItem ;
+ sh:property [ sh:path rcpp:itemCode ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ; sh:message "비용항목 식별코드가 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:itemName ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ; sh:message "비용항목명이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:minCount 1 ; sh:maxCount 1 ; sh:in (rcpp:RebarWork rcpp:ConcreteWork rcpp:FormworkWork rcpp:ShoringWork) ; sh:message "비용항목은 네 철근콘크리트 세부 공종 중 하나에 속해야 한다."@ko ] .
+
+rcpp:RebarCostItemShape a sh:NodeShape ; sh:targetClass rcpp:RebarCostItem ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:hasValue rcpp:RebarWork ; sh:message "철근 비용항목은 철근공사에 속해야 한다."@ko ] ;
+ sh:xone ( [ sh:class rcpp:RebarMaterialCostItem ] [ sh:class rcpp:RebarFabricationAssemblyCostItem ] ) ;
+ sh:sparql [ sh:message "철근 비용항목은 분류용 상위 클래스이므로 재료비 또는 가공·조립비 하위 유형으로 지정해야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { FILTER NOT EXISTS { $this a rcpp:RebarMaterialCostItem } FILTER NOT EXISTS { $this a rcpp:RebarFabricationAssemblyCostItem } }" ] .
+
+rcpp:RebarMaterialCostItemShape a sh:NodeShape ; sh:targetClass rcpp:RebarMaterialCostItem ;
+ sh:property [ sh:path rcpp:rebarGrade ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("SD400" "SD500") ; sh:message "철근 강종은 통제값 SD400 또는 SD500이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:nominalDiameterMm ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ; sh:message "철근 호칭지름은 mm 단위의 양수여야 한다."@ko ] .
+
+rcpp:RebarFabricationAssemblyCostItemShape a sh:NodeShape ; sh:targetClass rcpp:RebarFabricationAssemblyCostItem ;
+ sh:property [ sh:path rcpp:rebarGrade ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("SD400" "SD500") ; sh:message "철근 가공·조립비에는 비용 구분용 철근 강종이 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:nominalDiameterMm ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ; sh:message "철근 가공·조립비에는 비용 구분용 호칭지름이 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:fabricationAssemblyType ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("가공" "조립" "가공·조립") ; sh:message "철근 시공비 유형은 가공·조립 통제값이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:processingLocation ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("현장가공" "공장가공") ; sh:message "철근 가공 장소는 통제값이어야 한다."@ko ] .
+
+rcpp:ConcreteCostItemShape a sh:NodeShape ; sh:targetClass rcpp:ConcreteCostItem ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:hasValue rcpp:ConcreteWork ; sh:message "콘크리트 비용항목은 콘크리트공사에 속해야 한다."@ko ] ;
+ sh:xone ( [ sh:class rcpp:ReadyMixedConcreteCostItem ] [ sh:class rcpp:ConcretePlacementCostItem ] ) ;
+ sh:sparql [ sh:message "콘크리트 비용항목은 분류용 상위 클래스이므로 레디믹스트콘크리트 재료비 또는 타설비 하위 유형으로 지정해야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { FILTER NOT EXISTS { $this a rcpp:ReadyMixedConcreteCostItem } FILTER NOT EXISTS { $this a rcpp:ConcretePlacementCostItem } }" ] .
+
+rcpp:ReadyMixedConcreteCostItemShape a sh:NodeShape ; sh:targetClass rcpp:ReadyMixedConcreteCostItem ;
+ sh:property [ sh:path rcpp:maximumAggregateSizeMm ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ; sh:message "굵은골재 최대치수는 mm 단위의 양수여야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:nominalStrengthMPa ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ; sh:message "호칭강도는 MPa 단위의 양수여야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:slumpMm ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "슬럼프는 mm 단위의 0 이상 수치여야 한다."@ko ] .
+
+rcpp:ConcretePlacementCostItemShape a sh:NodeShape ; sh:targetClass rcpp:ConcretePlacementCostItem ;
+ sh:property [ sh:path rcpp:placementMethod ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("펌프카" "직접타설" "크레인버킷") ; sh:message "콘크리트 타설방법은 통제값이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:structureType ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("일반구조물" "기초" "벽" "기둥" "보" "슬래브") ; sh:message "콘크리트 구조물 유형은 통제값이어야 한다."@ko ] .
+
+rcpp:FormworkCostItemShape a sh:NodeShape ; sh:targetClass rcpp:FormworkCostItem ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:hasValue rcpp:FormworkWork ; sh:message "거푸집 비용항목은 거푸집공사에 속해야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:formworkType ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("합판거푸집" "유로폼" "강재거푸집") ; sh:message "거푸집 종류는 통제값이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:reuseCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ; sh:message "거푸집 전용횟수는 1 이상의 정수여야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:complexityClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("단순" "보통" "복잡") ; sh:message "거푸집 복잡도는 통제값이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:applicationPart ; sh:minCount 1 ; sh:datatype xsd:string ; sh:in ("기초" "벽" "기둥" "보" "슬래브") ; sh:message "거푸집 적용부위는 개별 통제값이어야 한다."@ko ] .
+
+rcpp:ShoringCostItemShape a sh:NodeShape ; sh:targetClass rcpp:ShoringCostItem ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:hasValue rcpp:ShoringWork ; sh:message "동바리 비용항목은 동바리공사에 속해야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:shoringType ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("파이프서포트" "시스템동바리") ; sh:message "동바리 종류는 통제값이어야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:maximumInstallationHeightM ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ; sh:message "동바리 설치높이는 m 단위의 양수여야 한다."@ko ] ;
+ sh:property [ sh:path rcpp:quantityBasis ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:in ("면적" "공간체적") ; sh:message "동바리 수량산정 기준은 면적 또는 공간체적이어야 한다."@ko ] ;
+ sh:sparql [ sh:message "동바리 수량산정 기준과 이를 표현하는 상세항목 단위가 일치해야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:quantityBasis ?basis . ?item rcpp:representsCostItem $this ; rcpp:usesUnit ?unit . FILTER ((?basis = "공간체적" && ?unit != rcpp:CubicMetreSpace) || (?basis = "면적" && ?unit != rcpp:SquareMetre)) }
+ """ ] .
+
+rcpp:DetailItemShape a sh:NodeShape ; sh:targetClass rcpp:DetailItem ;
+ sh:property [ sh:path rcpp:representsCostItem ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:CostItem ; sh:message "상세항목의 비용항목이 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:usesUnit ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:Unit ; sh:message "상세항목의 단위가 필요하다."@ko ] ;
+ sh:sparql [ sh:message "대응 항목은 같은 비용항목을 나타내야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:representsCostItem ?a . { $this ?flow ?other } UNION { ?other ?flow $this } FILTER (?flow IN (rcpp:providesCalculatedQuantityTo, rcpp:providesContractValueTo, rcpp:providesContractQuantityTo, rcpp:providesContractUnitPriceTo, rcpp:providesContractAmountTo, rcpp:providesCostBasisTo, rcpp:providesCurrentQuantityTo, rcpp:providesContractUnitPriceToProgress, rcpp:providesContractQuantityToProgress, rcpp:providesContractAmountToProgress, rcpp:providesPreviousTotalTo)) ?other rcpp:representsCostItem ?b . FILTER (?a != ?b) }
+ """ ] ;
+ sh:sparql [ sh:message "값 전달 관계의 원천과 결과 항목은 동일한 단위를 사용해야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE {
+    $this rcpp:usesUnit ?unit .
+    { $this ?flow ?other } UNION { ?other ?flow $this }
+    FILTER (?flow IN (rcpp:providesCalculatedQuantityTo, rcpp:providesContractQuantityTo, rcpp:providesContractUnitPriceTo, rcpp:providesContractAmountTo, rcpp:providesCurrentQuantityTo, rcpp:providesContractQuantityToProgress, rcpp:providesContractUnitPriceToProgress, rcpp:providesContractAmountToProgress, rcpp:providesPreviousTotalTo))
+    ?other rcpp:usesUnit ?otherUnit . FILTER (?unit != ?otherUnit)
+  }
+ """ ] .
+
+rcpp:WorkTypeDetailItemShape a sh:NodeShape ; sh:targetClass rcpp:WorkTypeDetailItem ;
+ sh:property [ sh:path rcpp:contractQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "공종별내역항목에는 계약수량이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractUnitPrice ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "공종별내역항목에는 계약단가가 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "공종별내역항목에는 계약금액이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractQuantityTo ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "계약수량 전달 원천이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractUnitPriceTo ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "계약단가 전달 원천이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractAmountTo ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "계약금액 전달 원천이 정확히 하나 필요하다."@ko ] ;
+ sh:sparql [ sh:message "계약수량·단가·금액은 동일한 계약항목에서 전달돼야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { ?q rcpp:providesContractQuantityTo $this . ?u rcpp:providesContractUnitPriceTo $this . ?a rcpp:providesContractAmountTo $this . FILTER (?q != ?u || ?q != ?a) }" ] ;
+ sh:sparql [ sh:message "공종별내역항목의 계약값은 구체 전달 원천 값과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { ?s rcpp:providesContractQuantityTo $this ; rcpp:contractQuantity ?sq ; rcpp:contractUnitPrice ?su ; rcpp:contractAmount ?sa . ?s rcpp:providesContractUnitPriceTo $this ; rcpp:providesContractAmountTo $this . $this rcpp:contractQuantity ?q ; rcpp:contractUnitPrice ?u ; rcpp:contractAmount ?a . FILTER (?q != ?sq || ?u != ?su || ?a != ?sa) }" ] .
+
+rcpp:CalculatedQuantityItemShape a sh:NodeShape ; sh:targetClass rcpp:CalculatedQuantityItem ;
+ sh:property [ sh:path rcpp:calculatedQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "0 이상의 산출수량이 정확히 하나 필요하다."@ko ] .
+rcpp:CurrentProgressQuantityItemShape a sh:NodeShape ; sh:targetClass rcpp:CurrentProgressQuantityItem ;
+ sh:property [ sh:path rcpp:currentQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "0 이상의 금회기성수량이 정확히 하나 필요하다."@ko ] .
+
+rcpp:CostCalculationItemShape a sh:NodeShape ; sh:targetClass rcpp:CostCalculationItem ;
+ sh:property [ sh:path rcpp:materialUnitCost ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:laborUnitCost ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:expenseUnitCost ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:calculatedUnitPrice ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:sparql [ sh:message "단위당 재료비 + 노무비 + 경비는 산출단가와 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:materialUnitCost ?m ; rcpp:laborUnitCost ?l ; rcpp:expenseUnitCost ?e ; rcpp:calculatedUnitPrice ?u . FILTER (?m + ?l + ?e != ?u) }" ] .
+
+rcpp:ContractItemShape a sh:NodeShape ; sh:targetClass rcpp:ContractItem ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesCalculatedQuantityTo ] ; sh:minCount 1 ; sh:class rcpp:CalculatedQuantityItem ; sh:message "계약항목에는 원천→결과 방향의 산출수량 전달이 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "0 이상의 계약수량이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractUnitPrice ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "0 이상의 계약단가가 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "0 이상의 계약금액이 정확히 하나 필요하다."@ko ] ;
+ sh:sparql [ sh:message "계약수량 × 계약단가는 계약금액과 같아야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:contractQuantity ?q ; rcpp:contractUnitPrice ?u ; rcpp:contractAmount ?a . FILTER (?q * ?u != ?a) }
+ """ ] ;
+ sh:sparql [ sh:message "계약수량은 대응 산출수량 합계와 같아야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:contractQuantity ?declared . { SELECT $this (SUM(?q) AS ?actual) WHERE { ?source rcpp:providesCalculatedQuantityTo $this ; rcpp:calculatedQuantity ?q . } GROUP BY $this } FILTER (?declared != ?actual) }
+ """ ] .
+
+rcpp:ProgressItemShape a sh:NodeShape ; sh:targetClass rcpp:ProgressItem ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesCurrentQuantityTo ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:CurrentProgressQuantityItem ; sh:message "원천→결과 방향의 금회수량 전달이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractQuantityToProgress ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "원천→결과 방향의 계약수량 전달이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractUnitPriceToProgress ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "원천→결과 방향의 계약단가 전달이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesContractAmountToProgress ] ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:ContractItem ; sh:message "원천→결과 방향의 계약금액 전달이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path rcpp:contractQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:contractUnitPrice ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:contractAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:previousQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:currentQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:cumulativeQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:remainingQuantity ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:previousAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:currentAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:cumulativeAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path rcpp:remainingAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:providesPreviousTotalTo ] ; sh:maxCount 1 ; sh:class rcpp:ProgressItem ; sh:message "전회누계 원천은 최대 하나여야 한다."@ko ] ;
+ sh:sparql [ sh:message "기성항목의 계약수량·단가·금액은 동일한 계약항목에서 전달돼야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { ?q rcpp:providesContractQuantityToProgress $this . ?u rcpp:providesContractUnitPriceToProgress $this . ?a rcpp:providesContractAmountToProgress $this . FILTER (?q != ?u || ?q != ?a) }" ] ;
+ sh:sparql [ sh:message "전회누계 전달은 자기 자신을 대상으로 할 수 없다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:providesPreviousTotalTo $this }" ] ;
+ sh:sparql [ sh:message "전회수량 또는 전회금액이 0보다 크면 이전 기성항목의 전회누계 전달이 필요하다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:previousQuantity ?q ; rcpp:previousAmount ?a . FILTER (?q > 0 || ?a > 0) FILTER NOT EXISTS { ?previous rcpp:providesPreviousTotalTo $this } }" ] ;
+ sh:sparql [ sh:message "전회수량·금액은 이전 기성항목의 누계값과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:previousQuantity ?q ; rcpp:previousAmount ?a . ?p rcpp:providesPreviousTotalTo $this ; rcpp:cumulativeQuantity ?pq ; rcpp:cumulativeAmount ?pa . FILTER (?q != ?pq || ?a != ?pa) }" ] ;
+ sh:sparql [ sh:message "이월 출처는 현재 항목보다 이전 회차 서류에 있어야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { ?currentDoc rcpp:containsItem $this ; rcpp:belongsToProgressRound ?currentRound . ?previous rcpp:providesPreviousTotalTo $this . ?previousDoc rcpp:containsItem ?previous ; rcpp:belongsToProgressRound ?previousRound . FILTER NOT EXISTS { ?currentRound rcpp:previousProgressRound ?previousRound } }
+ """ ] ;
+ sh:sparql [ sh:message "금회수량은 출처 항목의 금회수량과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:currentQuantity ?q . ?s rcpp:providesCurrentQuantityTo $this ; rcpp:currentQuantity ?sq . FILTER (?q != ?sq) }" ] ;
+ sh:sparql [ sh:message "계약수량은 계약수량 전달 출처 값과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:contractQuantity ?q . ?s rcpp:providesContractQuantityToProgress $this ; rcpp:contractQuantity ?sq . FILTER (?q != ?sq) }" ] ;
+ sh:sparql [ sh:message "계약단가는 계약단가 전달 출처 값과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:contractUnitPrice ?u . ?s rcpp:providesContractUnitPriceToProgress $this ; rcpp:contractUnitPrice ?su . FILTER (?u != ?su) }" ] ;
+ sh:sparql [ sh:message "계약금액은 계약금액 전달 출처 값과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:contractAmount ?a . ?s rcpp:providesContractAmountToProgress $this ; rcpp:contractAmount ?sa . FILTER (?a != ?sa) }" ] ;
+ sh:sparql [ sh:message "누계수량은 계약수량을 초과할 수 없다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:cumulativeQuantity ?c ; rcpp:contractQuantity ?q . FILTER (?c > ?q) }" ] ;
+ sh:sparql [ sh:message "전회수량 + 금회수량은 누계수량과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:previousQuantity ?p ; rcpp:currentQuantity ?n ; rcpp:cumulativeQuantity ?c . FILTER (?p + ?n != ?c) }" ] ;
+ sh:sparql [ sh:message "계약수량 - 누계수량은 잔여수량과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:contractQuantity ?q ; rcpp:cumulativeQuantity ?c ; rcpp:remainingQuantity ?r . FILTER (?q - ?c != ?r) }" ] ;
+ sh:sparql [ sh:message "금회수량 × 계약단가는 금회금액과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:currentQuantity ?q ; rcpp:contractUnitPrice ?u ; rcpp:currentAmount ?a . FILTER (?q * ?u != ?a) }" ] ;
+ sh:sparql [ sh:message "전회금액 + 금회금액은 누계금액과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:previousAmount ?p ; rcpp:currentAmount ?n ; rcpp:cumulativeAmount ?c . FILTER (?p + ?n != ?c) }" ] ;
+ sh:sparql [ sh:message "계약금액 - 누계금액은 잔여금액과 같아야 한다."@ko ; sh:select "PREFIX rcpp: <https://example.org/rcpp#> SELECT $this WHERE { $this rcpp:contractAmount ?q ; rcpp:cumulativeAmount ?c ; rcpp:remainingAmount ?r . FILTER (?q - ?c != ?r) }" ] .
+
+rcpp:SummaryItemShape a sh:NodeShape ; sh:targetClass rcpp:SummaryItem ;
+ sh:property [ sh:path rcpp:belongsToWorkCategory ; sh:minCount 1 ; sh:maxCount 1 ; sh:class rcpp:WorkCategory ; sh:message "집계항목의 철근콘크리트 세부 공종이 필요하다."@ko ] ;
+ sh:sparql [ sh:message "집계항목에 연결된 모든 상세항목은 같은 공종이어야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:belongsToWorkCategory ?summaryCategory . { ?detail rcpp:aggregatedContractInto $this } UNION { ?detail rcpp:aggregatedProgressInto $this } ?detail rcpp:representsCostItem ?cost . ?cost rcpp:belongsToWorkCategory ?detailCategory . FILTER (?summaryCategory != ?detailCategory) }
+ """ ] .
+
+rcpp:ContractSummaryItemShape a sh:NodeShape ; sh:targetClass rcpp:ContractSummaryItem ;
+ sh:property [ sh:path rcpp:contractAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "계약집계항목에는 0 이상의 계약집계금액이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:aggregatedContractInto ] ; sh:minCount 1 ; sh:class rcpp:WorkTypeDetailItem ; sh:message "계약집계항목에는 하나 이상의 공종별내역 집계 원천이 필요하다."@ko ] ;
+ sh:sparql [ sh:message "계약 집계금액은 연결된 상세항목 계약금액 합계와 같아야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:contractAmount ?declared . { SELECT $this (SUM(?amount) AS ?actual) WHERE { ?detail rcpp:aggregatedContractInto $this ; rcpp:contractAmount ?amount . } GROUP BY $this } FILTER (?declared != ?actual) }
+ """ ] .
+
+rcpp:ProgressSummaryItemShape a sh:NodeShape ; sh:targetClass rcpp:ProgressSummaryItem ;
+ sh:property [ sh:path rcpp:currentAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:message "기성집계항목에는 0 이상의 금회집계금액이 정확히 하나 필요하다."@ko ] ;
+ sh:property [ sh:path [ sh:inversePath rcpp:aggregatedProgressInto ] ; sh:minCount 1 ; sh:class rcpp:ProgressItem ; sh:message "기성집계항목에는 하나 이상의 기성금액 집계 원천이 필요하다."@ko ] ;
+ sh:sparql [ sh:message "기성 집계금액은 연결된 상세항목 금회금액 합계와 같아야 한다."@ko ; sh:select """
+  PREFIX rcpp: <https://example.org/rcpp#>
+  SELECT $this WHERE { $this rcpp:currentAmount ?declared . { SELECT $this (SUM(?amount) AS ?actual) WHERE { ?detail rcpp:aggregatedProgressInto $this ; rcpp:currentAmount ?amount . } GROUP BY $this } FILTER (?declared != ?actual) }
+ """ ] .

@@ -1,0 +1,38 @@
+@prefix rcpp: <https://example.org/rcpp#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# 공종은 클래스와 개체를 혼용하지 않는 통제 분류 개체로 정의한다.
+rcpp:ReinforcedConcreteWork a rcpp:WorkCategory ; rdfs:label "철근콘크리트공사"@ko ; rdfs:comment "본 온톨로지가 다루는 최상위 공종"@ko .
+rcpp:RebarWork a rcpp:WorkCategory ; rcpp:subWorkCategoryOf rcpp:ReinforcedConcreteWork ; rdfs:label "철근공사"@ko ; rdfs:comment "철근 재료와 가공·조립 비용 공종"@ko .
+rcpp:ConcreteWork a rcpp:WorkCategory ; rcpp:subWorkCategoryOf rcpp:ReinforcedConcreteWork ; rdfs:label "콘크리트공사"@ko ; rdfs:comment "레미콘 재료와 콘크리트 타설 비용 공종"@ko .
+rcpp:FormworkWork a rcpp:WorkCategory ; rcpp:subWorkCategoryOf rcpp:ReinforcedConcreteWork ; rdfs:label "거푸집공사"@ko ; rdfs:comment "거푸집 설치·해체 비용 공종"@ko .
+rcpp:ShoringWork a rcpp:WorkCategory ; rcpp:subWorkCategoryOf rcpp:ReinforcedConcreteWork ; rdfs:label "동바리공사"@ko ; rdfs:comment "동바리 설치·해체 비용 공종"@ko .
+
+rcpp:Tonne a rcpp:Unit ; rdfs:label "톤"@ko ; rdfs:comment "철근 수량에 사용하는 질량 단위 t"@ko .
+rcpp:CubicMetre a rcpp:Unit ; rdfs:label "세제곱미터"@ko ; rdfs:comment "콘크리트 수량에 사용하는 체적 단위 m³"@ko .
+rcpp:SquareMetre a rcpp:Unit ; rdfs:label "제곱미터"@ko ; rdfs:comment "거푸집과 동바리 수량에 사용하는 면적 단위 m²"@ko .
+rcpp:CubicMetreSpace a rcpp:Unit ; rdfs:label "공간세제곱미터"@ko ; rdfs:comment "시스템동바리 수량산정에 사용하는 공간체적 단위 공m³"@ko .
+
+# 상세 비용속성의 공식 근거
+rcpp:StandardEstimatingReference a rdfs:Resource ;
+ rdfs:label "2026년 건설공사 표준품셈"@ko ;
+ rdfs:comment "철근콘크리트공사의 비용 구분값과 수량산정 기준 채택 근거"@ko ;
+ dcterms:creator "국토교통부·한국건설기술연구원"@ko ; dcterms:issued "2026" ;
+ dcterms:identifier "국토교통부 공고 제2025-1574호" ;
+ rdfs:seeAlso <https://www.codil.or.kr/helpdesk/read.do?bbsId=BBSMSTR_900000000202&nttId=13261> .
+rcpp:KSF4009Reference a rdfs:Resource ;
+ rdfs:label "KS F 4009 레디믹스트 콘크리트"@ko ;
+ rdfs:comment "굵은골재 최대치수·호칭강도·슬럼프 구조화 근거"@ko ;
+ dcterms:creator "국가기술표준원"@ko ; dcterms:identifier "KS F 4009" ;
+ rdfs:seeAlso <https://kats.go.kr/mobile/content.do?cid=1026&cmsid=481&mode=view&page=303&skin=%2Fmobile%2F> .
+rcpp:KCSRebarReference a rdfs:Resource ;
+ rdfs:label "KCS 14 20 11 철근공사"@ko ;
+ rdfs:comment "철근 강종·지름 및 철근공사 속성 채택 근거"@ko ;
+ dcterms:creator "국토교통부 국가건설기준센터"@ko ; dcterms:identifier "KCS 14 20 11" ;
+ rdfs:seeAlso <https://www.kcsc.re.kr/> .
+rcpp:KCSFormworkShoringReference a rdfs:Resource ;
+ rdfs:label "KCS 14 20 12 거푸집 및 동바리"@ko ;
+ rdfs:comment "거푸집·동바리 종류와 설치조건 속성 채택 근거"@ko ;
+ dcterms:creator "국토교통부 국가건설기준센터"@ko ; dcterms:issued "2024-12-30" ; dcterms:identifier "KCS 14 20 12" ;
+ rdfs:seeAlso <https://kcsc.re.kr/board/notdetail/6639> .

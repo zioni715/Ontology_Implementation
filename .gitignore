@@ -1,0 +1,14 @@
+/*
+!/.gitignore
+!/README.md
+!/requirements.txt
+!/KO/
+
+/KO/*
+!/KO/ontology/
+!/KO/visualization/
+
+**/__pycache__/
+*.py[cod]
+
+/KO/ontology/generate_specification.py

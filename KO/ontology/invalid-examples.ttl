@@ -1,0 +1,80 @@
+@prefix rcpp: <https://example.org/rcpp#> .
+@prefix bad: <https://example.org/rcpp/invalid#> .
+
+# 누락/음수 사례
+bad:BadContract a rcpp:ContractItem ; rcpp:itemName "오류 계약항목" ; rcpp:representsCostItem bad:CostA ;
+  rcpp:contractQuantity -1.0 ; rcpp:contractAmount -100.0 .
+
+# 초과 및 다섯 산식 오류, 출처 누락, 서로 다른 비용항목
+bad:BadProgress a rcpp:ProgressItem ; rcpp:itemName "오류 기성항목" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 100.0 ; rcpp:contractUnitPrice 10.0 ; rcpp:contractAmount 1000.0 ;
+  rcpp:previousQuantity 90.0 ; rcpp:currentQuantity 20.0 ; rcpp:cumulativeQuantity 120.0 ; rcpp:remainingQuantity 1.0 ;
+  rcpp:previousAmount 900.0 ; rcpp:currentAmount 1.0 ; rcpp:cumulativeAmount 950.0 ; rcpp:remainingAmount 1.0 .
+bad:OtherContract a rcpp:ContractItem ; rcpp:itemName "다른 계약항목" ; rcpp:representsCostItem bad:CostB ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 1.0 ; rcpp:contractUnitPrice 1.0 ; rcpp:contractAmount 1.0 .
+bad:OtherContract rcpp:providesContractUnitPriceToProgress bad:BadProgress .
+bad:Previous rcpp:providesPreviousTotalTo bad:Previous .
+bad:Previous a rcpp:ProgressItem ; rcpp:itemName "전회" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne .
+bad:Source a rcpp:CurrentProgressQuantityItem ; rcpp:itemName "출처" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:currentQuantity 1.0 .
+bad:Source rcpp:providesCurrentQuantityTo bad:BadProgress .
+bad:SourceContract a rcpp:ContractItem ; rcpp:itemName "출처 계약" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 1.0 ; rcpp:contractUnitPrice 1.0 ; rcpp:contractAmount 1.0 .
+
+# 상세 합계(10)와 집계값(9)의 불일치
+bad:Detail a rcpp:WorkTypeDetailItem ; rcpp:itemName "상세" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractAmount 10.0 ; rcpp:aggregatedContractInto bad:Summary .
+bad:Summary a rcpp:ContractSummaryItem ; rcpp:itemName "집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:contractAmount 9.0 .
+bad:CostA a rcpp:CostItem .
+bad:CostB a rcpp:CostItem .
+
+# 계약 산식과 복수 산출수량 전달 오류
+bad:Calculated a rcpp:CalculatedQuantityItem ; rcpp:itemName "산출" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 2.0 .
+bad:Calculated rcpp:providesCalculatedQuantityTo bad:BadFormulaContract .
+bad:BadFormulaContract a rcpp:ContractItem ; rcpp:itemName "산식 오류 계약" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 3.0 ; rcpp:contractUnitPrice 10.0 ; rcpp:contractAmount 31.0.
+
+# 금회수량 전달값 오류
+bad:TransferSource a rcpp:CurrentProgressQuantityItem ; rcpp:itemName "금회수량 출처" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:currentQuantity 2.0 .
+bad:TransferSource rcpp:providesCurrentQuantityTo bad:BadTransfer .
+bad:TransferContract rcpp:providesContractUnitPriceToProgress bad:BadTransfer .
+bad:OtherContract rcpp:providesContractQuantityToProgress bad:BadTransfer ; rcpp:providesContractAmountToProgress bad:BadTransfer .
+bad:BadTransfer a rcpp:ProgressItem ; rcpp:itemName "전달값 오류" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 10.0 ; rcpp:contractUnitPrice 10.0 ; rcpp:contractAmount 100.0 ;
+  rcpp:previousQuantity 0.0 ; rcpp:currentQuantity 3.0 ; rcpp:cumulativeQuantity 3.0 ; rcpp:remainingQuantity 7.0 ;
+  rcpp:previousAmount 0.0 ; rcpp:currentAmount 30.0 ; rcpp:cumulativeAmount 30.0 ; rcpp:remainingAmount 70.0 .
+bad:TransferCalculated a rcpp:CalculatedQuantityItem ; rcpp:itemName "계약 산출" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 10.0 .
+bad:TransferContract a rcpp:ContractItem ; rcpp:itemName "전달 계약" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 10.0 ; rcpp:contractUnitPrice 10.0 ; rcpp:contractAmount 100.0.
+
+# 전달관계의 단위 불일치
+bad:UnitCalculated a rcpp:CalculatedQuantityItem ; rcpp:itemName "단위 불일치 산출" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 1.0 ; rcpp:providesCalculatedQuantityTo bad:UnitContract .
+bad:UnitContract a rcpp:ContractItem ; rcpp:itemName "단위 불일치 계약" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:contractQuantity 1.0 ; rcpp:contractUnitPrice 1.0 ; rcpp:contractAmount 1.0 .
+
+# 전회금액만 존재해도 이월 원천이 필요하다.
+bad:PreviousAmountOnly a rcpp:ProgressItem ; rcpp:itemName "전회금액만 존재" ; rcpp:representsCostItem bad:CostA ; rcpp:usesUnit rcpp:Tonne ;
+  rcpp:contractQuantity 10.0 ; rcpp:contractUnitPrice 10.0 ; rcpp:contractAmount 100.0 ;
+  rcpp:previousQuantity 0.0 ; rcpp:currentQuantity 0.0 ; rcpp:cumulativeQuantity 0.0 ; rcpp:remainingQuantity 10.0 ;
+  rcpp:previousAmount 10.0 ; rcpp:currentAmount 0.0 ; rcpp:cumulativeAmount 10.0 ; rcpp:remainingAmount 90.0 .
+
+# 공종별 비용규격 자료형·통제값 오류
+bad:BadRebarSpec a rcpp:RebarMaterialCostItem ; rcpp:rebarGrade "SS400" ; rcpp:nominalDiameterMm -10.0 .
+bad:BadConcreteSpec a rcpp:ReadyMixedConcreteCostItem ; rcpp:maximumAggregateSizeMm -25.0 ; rcpp:nominalStrengthMPa 24.0 .
+bad:BadFormworkSpec a rcpp:FormworkCostItem ; rcpp:formworkType "합판거푸집" ; rcpp:reuseCount 0 .
+bad:BadShoringSpec a rcpp:ShoringCostItem ; rcpp:shoringType "시스템동바리" ; rcpp:maximumInstallationHeightM "m" ; rcpp:quantityBasis "제곱미터" .
+bad:UnsupportedCountShoring a rcpp:ShoringCostItem ; rcpp:itemCode "S-COUNT" ; rcpp:itemName "개소 기준 동바리" ; rcpp:belongsToWorkCategory rcpp:ShoringWork ; rcpp:shoringType "시스템동바리" ; rcpp:maximumInstallationHeightM 5.0 ; rcpp:quantityBasis "개소" .
+
+# 신규 정밀 제약: 직전 회차, 필수 기성항목, 집계 원천, 동바리 기준–단위
+bad:Round1 a rcpp:ProgressPaymentRound ; rcpp:roundNumber 1 .
+bad:Round3 a rcpp:ProgressPaymentRound ; rcpp:roundNumber 3 ; rcpp:previousProgressRound bad:Round1 .
+bad:Round2Missing a rcpp:ProgressPaymentRound ; rcpp:roundNumber 2 .
+bad:DirectRebar a rcpp:RebarCostItem ; rcpp:belongsToWorkCategory rcpp:RebarWork .
+bad:DirectConcrete a rcpp:ConcreteCostItem ; rcpp:belongsToWorkCategory rcpp:ConcreteWork .
+bad:DualRebar a rcpp:RebarMaterialCostItem, rcpp:RebarFabricationAssemblyCostItem ; rcpp:itemCode "R-DUAL" ; rcpp:itemName "철근 이중유형" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:rebarGrade "SD400" ; rcpp:nominalDiameterMm 10.0 ; rcpp:fabricationAssemblyType "가공" ; rcpp:processingLocation "현장가공" .
+bad:DualConcrete a rcpp:ReadyMixedConcreteCostItem, rcpp:ConcretePlacementCostItem ; rcpp:itemCode "C-DUAL" ; rcpp:itemName "콘크리트 이중유형" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:maximumAggregateSizeMm 25.0 ; rcpp:nominalStrengthMPa 24.0 ; rcpp:slumpMm 150.0 ; rcpp:placementMethod "펌프카" ; rcpp:structureType "일반구조물" .
+bad:PreviousA a rcpp:ProgressItem ; rcpp:providesPreviousTotalTo bad:BadProgress .
+bad:PreviousB a rcpp:ProgressItem ; rcpp:providesPreviousTotalTo bad:BadProgress .
+bad:EmptyPayment a rcpp:ProgressPaymentStatement ; rcpp:documentIdentifier "EMPTY" ; rcpp:belongsToProgressRound bad:Round3 .
+bad:LonelySummary a rcpp:ContractSummaryItem ; rcpp:itemName "원천 없는 집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:contractAmount 0.0 .
+bad:LonelySummaryDoc a rcpp:WorkTypeSummaryStatement ; rcpp:documentIdentifier "LONELY" ; rcpp:containsItem bad:LonelySummary .
+bad:ShoringUnitCost a rcpp:ShoringCostItem ; rcpp:itemCode "S-BAD-U" ; rcpp:itemName "단위 오류 동바리" ; rcpp:specification "공간체적" ; rcpp:belongsToWorkCategory rcpp:ShoringWork ; rcpp:shoringType "시스템동바리" ; rcpp:maximumInstallationHeightM 5.0 ; rcpp:quantityBasis "공간체적" .
+bad:ShoringUnitItem a rcpp:CalculatedQuantityItem ; rcpp:itemName "동바리 단위 오류 항목" ; rcpp:representsCostItem bad:ShoringUnitCost ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:calculatedQuantity 1.0 .
+bad:ShoringUnitDoc a rcpp:QuantityCalculationSheet ; rcpp:documentIdentifier "S-BAD-U" ; rcpp:containsItem bad:ShoringUnitItem .

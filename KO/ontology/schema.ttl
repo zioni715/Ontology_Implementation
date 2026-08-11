@@ -1,0 +1,8 @@
+@prefix rcpp: <https://example.org/rcpp#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+rcpp:OntologySchema a rdfs:Resource ;
+  rdfs:label "RCPP 단일 온톨로지"@ko ;
+  rdfs:comment "철근콘크리트 공종의 공사기성부분내역서 작성에 필요한 비용 관련 서류의 항목, 수량, 단가, 금액 및 서류 간 정보전달·산정·집계 관계를 표현한다."@ko ;
+  dcterms:hasVersion "1.0.0-dev.48" .
