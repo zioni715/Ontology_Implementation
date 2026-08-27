@@ -1,4 +1,4 @@
-@prefix rcpp: <https://example.org/rcpp#> .
+@prefix rcpp: <https://zioni715.github.io/ontology/rcpp#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 

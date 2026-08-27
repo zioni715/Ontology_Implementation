@@ -6,15 +6,20 @@ from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS
 
 HERE = Path(__file__).resolve().parent
-R = Namespace("https://example.org/rcpp#")
+R = Namespace("https://zioni715.github.io/ontology/rcpp#")
 FILES = ("schema.ttl", "classes.ttl", "properties.ttl", "code-lists.ttl")
 
 graph = Graph()
 for name in FILES:
     graph.parse(HERE / name, format="turtle")
+bundle = Graph().parse(HERE / "rcpp-rdfs.ttl", format="turtle")
 classes = set(graph.subjects(RDF.type, RDFS.Class))
 properties = set(graph.subjects(RDF.type, RDF.Property))
 errors = []
+if set(graph) != set(bundle):
+    missing = len(set(graph) - set(bundle))
+    extra = len(set(bundle) - set(graph))
+    errors.append(f"submission bundle differs from source modules: missing={missing}, extra={extra}")
 usage = Graph().parse(HERE / "examples.ttl", format="turtle")
 usage += Graph().parse(HERE / "shapes.ttl", format="turtle")
 usage += Graph().parse(HERE / "code-lists.ttl", format="turtle")
@@ -43,12 +48,11 @@ for predicate, label in ((RDFS.subClassOf, "class"), (RDFS.subPropertyOf, "prope
 removed = (R.Project, R.belongsToProject, R.projectIdentifier, R.CostSpecification, R.hasCostSpecification, R.RebarSpecification, R.ReadyMixedConcreteSpecification, R.ConcretePlacementSpecification, R.FormworkSpecification, R.ShoringSpecification, R.usesUnitPriceFrom, R.derivedFrom, R.previousQuantityFrom, R.aggregatedInto, R.costItemCategory, R.materialCost, R.laborCost, R.expenseCost, R.totalCost, R.providesUnitPriceTo, R.QuantityItem, R.CalculationActivity, R.DocumentItemMatching, R.FieldRequirement, R.SpecificationNormalizationRule, R.DocumentUsage, R.itemOfDocument)
 for resource in removed:
     if any(resource in triple for triple in graph): errors.append(f"removed concept remains: {resource}")
-confirmed_flows = (R.providesCalculatedQuantityTo, R.providesContractValueTo, R.providesContractQuantityTo, R.providesContractUnitPriceTo, R.providesContractAmountTo, R.providesCurrentQuantityTo, R.providesContractQuantityToProgress, R.providesContractUnitPriceToProgress, R.providesContractAmountToProgress, R.providesPreviousTotalTo, R.aggregatedContractInto, R.aggregatedProgressInto)
+confirmed_flows = (R.providesCalculatedQuantityTo, R.providesContractValueTo, R.providesContractQuantityTo, R.providesContractUnitPriceTo, R.providesContractAmountTo, R.providesContractQuantityToProgressPaymentItem, R.providesContractUnitPriceToProgressPaymentItem, R.providesContractAmountToProgressPaymentItem, R.providesCumulativeValuesTo, R.contributesContractAmountTo, R.contributesCurrentAmountTo)
 for resource in confirmed_flows:
     if (resource, R.validationStatus, Literal("confirmed")) not in graph: errors.append(f"confirmed status missing: {resource}")
-if (R.providesCostBasisTo, R.validationStatus, Literal("provisional")) not in graph: errors.append("provisional status missing: providesCostBasisTo")
 if not (15 <= len(classes) <= 35): errors.append(f"class count out of compact range: {len(classes)}")
 if not (25 <= len(properties) <= 80): errors.append(f"property count out of compact range: {len(properties)}")
 if errors:
     print("\n".join(f"[ERROR] {e}" for e in errors)); raise SystemExit(1)
-print(f"[OK] one ontology, {len(graph)} triples, {len(classes)} classes, {len(properties)} properties")
+print(f"[OK] source modules and submission bundle match; {len(graph)} triples, {len(classes)} classes, {len(properties)} properties")

@@ -1,0 +1,132 @@
+@prefix rcpp: <https://zioni715.github.io/ontology/rcpp#> .
+@prefix ex: <https://zioni715.github.io/ontology/rcpp/example#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Round1 a rcpp:ProgressPaymentRound ; rcpp:roundNumber 1 .
+ex:Round2 a rcpp:ProgressPaymentRound ; rcpp:roundNumber 2 ; rcpp:previousProgressRound ex:Round1 .
+ex:Round3 a rcpp:ProgressPaymentRound ; rcpp:roundNumber 3 ; rcpp:previousProgressRound ex:Round2 .
+ex:QuantityDoc a rcpp:QuantityCalculationSheet ; rcpp:documentIdentifier "QTY-A" .
+ex:ContractDoc a rcpp:ContractStatement ; rcpp:documentIdentifier "CON-A" .
+ex:CostDoc a rcpp:CostCalculationStatement ; rcpp:documentIdentifier "COST-A" .
+ex:DetailDoc a rcpp:WorkCategoryDetailStatement ; rcpp:documentIdentifier "DET-A" .
+ex:ContractSummaryDoc a rcpp:WorkCategorySummaryStatement ; rcpp:documentIdentifier "SUM-A" .
+ex:PaymentDocR2 a rcpp:ProgressPaymentStatement ; rcpp:documentIdentifier "PAY-R2" ; rcpp:belongsToProgressRound ex:Round2 .
+ex:PaymentDocR3 a rcpp:ProgressPaymentStatement ; rcpp:documentIdentifier "PAY-R3" ; rcpp:belongsToProgressRound ex:Round3 .
+
+ex:RebarD10 a rcpp:RebarFabricationAssemblyCostItem ; rcpp:itemCode "R-10" ; rcpp:itemName "철근가공조립 D10" ; rcpp:specification "SD400 D10 현장 가공·조립" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:rebarGrade "SD400" ; rcpp:nominalDiameterMm 10.0 ; rcpp:fabricationAssemblyType "가공·조립" ; rcpp:processingLocation "현장가공" .
+ex:RebarD16 a rcpp:RebarFabricationAssemblyCostItem ; rcpp:itemCode "R-16" ; rcpp:itemName "철근가공조립 D16" ; rcpp:specification "SD400 D16 현장 가공·조립" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:rebarGrade "SD400" ; rcpp:nominalDiameterMm 16.0 ; rcpp:fabricationAssemblyType "가공·조립" ; rcpp:processingLocation "현장가공" .
+ex:RebarMaterialD10 a rcpp:RebarMaterialCostItem ; rcpp:itemCode "RM-10" ; rcpp:itemName "철근재료 D10" ; rcpp:specification "SD400 D10" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:rebarGrade "SD400" ; rcpp:nominalDiameterMm 10.0 .
+ex:Concrete a rcpp:ConcretePlacementCostItem ; rcpp:itemCode "C-01" ; rcpp:itemName "콘크리트 펌프카 타설" ; rcpp:specification "펌프카 일반구조물" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:placementMethod "펌프카" ; rcpp:structureType "일반구조물" .
+ex:ReadyMixedConcrete a rcpp:ReadyMixedConcreteMaterialCostItem ; rcpp:itemCode "CM-01" ; rcpp:itemName "레디믹스트콘크리트" ; rcpp:specification "25-24-150" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:maximumAggregateSizeMm 25.0 ; rcpp:nominalStrengthMPa 24.0 ; rcpp:slumpMm 150.0 .
+ex:Formwork a rcpp:FormworkCostItem ; rcpp:itemCode "F-01" ; rcpp:itemName "합판거푸집" ; rcpp:specification "3회 보통" ; rcpp:belongsToWorkCategory rcpp:FormworkWork ; rcpp:formworkType "합판거푸집" ; rcpp:reuseCount 3 ; rcpp:complexityClass "보통" ; rcpp:applicationPart "벽", "기둥", "보", "슬래브" .
+ex:Shoring a rcpp:ShoringCostItem ; rcpp:itemCode "S-01" ; rcpp:itemName "시스템동바리" ; rcpp:specification "H≤5m 공간체적" ; rcpp:belongsToWorkCategory rcpp:ShoringWork ; rcpp:shoringType "시스템동바리" ; rcpp:maximumInstallationHeightM 5.0 ; rcpp:quantityBasis "공간체적" .
+
+# 원가계산서는 공종별내역서에 비용 산정 근거를 전달한다.
+ex:CI-R10 a rcpp:CostCalculationItem ; rcpp:itemName "철근 D10 원가계산" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:materialUnitCost 600.0 ; rcpp:laborUnitCost 300.0 ; rcpp:expenseUnitCost 100.0 ; rcpp:calculatedUnitPrice 1000.0 .
+ex:CI-R16 a rcpp:CostCalculationItem ; rcpp:itemName "철근 D16 원가계산" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:materialUnitCost 600.0 ; rcpp:laborUnitCost 300.0 ; rcpp:expenseUnitCost 100.0 ; rcpp:calculatedUnitPrice 1000.0 .
+ex:CI-C a rcpp:CostCalculationItem ; rcpp:itemName "콘크리트 원가계산" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:materialUnitCost 350.0 ; rcpp:laborUnitCost 100.0 ; rcpp:expenseUnitCost 50.0 ; rcpp:calculatedUnitPrice 500.0 .
+ex:CI-F a rcpp:CostCalculationItem ; rcpp:itemName "거푸집 원가계산" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:materialUnitCost 80.0 ; rcpp:laborUnitCost 100.0 ; rcpp:expenseUnitCost 20.0 ; rcpp:calculatedUnitPrice 200.0 .
+ex:CI-S a rcpp:CostCalculationItem ; rcpp:itemName "동바리 원가계산" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:materialUnitCost 40.0 ; rcpp:laborUnitCost 50.0 ; rcpp:expenseUnitCost 10.0 ; rcpp:calculatedUnitPrice 100.0 .
+
+# 철근 D10: 계약 50×1000=50000, 전회 10, 금회 5
+ex:QB-R10 a rcpp:CalculatedQuantityItem ; rcpp:itemName "철근 D10 산출" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 50.0 .
+ex:CT-R10 a rcpp:ContractItem ; rcpp:itemName "철근 D10 계약" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 50.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 50000.0.
+ex:WD-R10 a rcpp:WorkCategoryDetailItem ; rcpp:itemName "철근 D10 상세" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 50.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 50000.0; rcpp:contributesContractAmountTo ex:CS-R .
+ex:PV-R10 a rcpp:ProgressPaymentItem ; rcpp:itemName "철근 D10 2회 기성" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 50.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 50000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 10.0 ; rcpp:cumulativeQuantity 10.0 ; rcpp:remainingQuantity 40.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 10000.0 ; rcpp:cumulativeAmount 10000.0 ; rcpp:remainingAmount 40000.0.
+ex:PR-R10 a rcpp:ProgressPaymentItem ; rdfs:label "철근 D10 3회 기성"@ko ; rcpp:itemName "철근 D10 3회 기성" ; rcpp:representsCostItem ex:RebarD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 50.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 50000.0 ; rcpp:previousCumulativeQuantity 10.0 ; rcpp:currentQuantity 5.0 ; rcpp:cumulativeQuantity 15.0 ; rcpp:remainingQuantity 35.0 ; rcpp:previousCumulativeAmount 10000.0 ; rcpp:currentAmount 5000.0 ; rcpp:cumulativeAmount 15000.0 ; rcpp:remainingAmount 35000.0; rcpp:contributesCurrentAmountTo ex:PS-R .
+
+# 철근 D16: 계약 100×1000=100000, 전회 20, 금회 10
+ex:QB-R16 a rcpp:CalculatedQuantityItem ; rcpp:itemName "철근 D16 산출" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 40.0 .
+ex:QB-R16-2 a rcpp:CalculatedQuantityItem ; rcpp:itemName "철근 D16 추가 산출" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 60.0 .
+ex:CT-R16 a rcpp:ContractItem ; rcpp:itemName "철근 D16 계약" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 100.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 100000.0.
+ex:WD-R16 a rcpp:WorkCategoryDetailItem ; rcpp:itemName "철근 D16 상세" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 100.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 100000.0; rcpp:contributesContractAmountTo ex:CS-R .
+ex:PV-R16 a rcpp:ProgressPaymentItem ; rcpp:itemName "철근 D16 2회 기성" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 100.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 100000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 20.0 ; rcpp:cumulativeQuantity 20.0 ; rcpp:remainingQuantity 80.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 20000.0 ; rcpp:cumulativeAmount 20000.0 ; rcpp:remainingAmount 80000.0.
+ex:PR-R16 a rcpp:ProgressPaymentItem ; rcpp:itemName "철근 D16 3회 기성" ; rcpp:representsCostItem ex:RebarD16 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 100.0 ; rcpp:contractUnitPrice 1000.0 ; rcpp:contractAmount 100000.0 ; rcpp:previousCumulativeQuantity 20.0 ; rcpp:currentQuantity 10.0 ; rcpp:cumulativeQuantity 30.0 ; rcpp:remainingQuantity 70.0 ; rcpp:previousCumulativeAmount 20000.0 ; rcpp:currentAmount 10000.0 ; rcpp:cumulativeAmount 30000.0 ; rcpp:remainingAmount 70000.0; rcpp:contributesCurrentAmountTo ex:PS-R .
+ex:CS-R a rcpp:ContractSummaryItem ; rcpp:itemName "철근 계약집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:contractAmount 150000.0 .
+ex:PS-R a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "철근 기성집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:currentAmount 15000.0 .
+
+# 나머지 공종은 동일 구조의 단일 상세항목 사례
+ex:QB-C a rcpp:CalculatedQuantityItem ; rcpp:itemName "콘크리트 산출" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:calculatedQuantity 200.0 .
+ex:CT-C a rcpp:ContractItem ; rcpp:itemName "콘크리트 계약" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 200.0 ; rcpp:contractUnitPrice 500.0 ; rcpp:contractAmount 100000.0.
+ex:WD-C a rcpp:WorkCategoryDetailItem ; rcpp:itemName "콘크리트 상세" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractAmount 100000.0; rcpp:contributesContractAmountTo ex:CS-C .
+ex:PV-C a rcpp:ProgressPaymentItem ; rcpp:itemName "콘크리트 2회" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 200.0 ; rcpp:contractUnitPrice 500.0 ; rcpp:contractAmount 100000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 40.0 ; rcpp:cumulativeQuantity 40.0 ; rcpp:remainingQuantity 160.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 20000.0 ; rcpp:cumulativeAmount 20000.0 ; rcpp:remainingAmount 80000.0.
+ex:PR-C a rcpp:ProgressPaymentItem ; rcpp:itemName "콘크리트 3회" ; rcpp:representsCostItem ex:Concrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 200.0 ; rcpp:contractUnitPrice 500.0 ; rcpp:contractAmount 100000.0 ; rcpp:previousCumulativeQuantity 40.0 ; rcpp:currentQuantity 20.0 ; rcpp:cumulativeQuantity 60.0 ; rcpp:remainingQuantity 140.0 ; rcpp:previousCumulativeAmount 20000.0 ; rcpp:currentAmount 10000.0 ; rcpp:cumulativeAmount 30000.0 ; rcpp:remainingAmount 70000.0; rcpp:contributesCurrentAmountTo ex:PS-C .
+ex:CS-C a rcpp:ContractSummaryItem ; rcpp:itemName "콘크리트 계약집계" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:contractAmount 100000.0 .
+ex:PS-C a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "콘크리트 기성집계" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:currentAmount 10000.0 .
+
+ex:QB-F a rcpp:CalculatedQuantityItem ; rcpp:itemName "거푸집 산출" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:calculatedQuantity 300.0 .
+ex:CT-F a rcpp:ContractItem ; rcpp:itemName "거푸집 계약" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:contractQuantity 300.0 ; rcpp:contractUnitPrice 200.0 ; rcpp:contractAmount 60000.0.
+ex:WD-F a rcpp:WorkCategoryDetailItem ; rcpp:itemName "거푸집 상세" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:contractAmount 60000.0; rcpp:contributesContractAmountTo ex:CS-F .
+ex:PV-F a rcpp:ProgressPaymentItem ; rcpp:itemName "거푸집 2회" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:contractQuantity 300.0 ; rcpp:contractUnitPrice 200.0 ; rcpp:contractAmount 60000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 60.0 ; rcpp:cumulativeQuantity 60.0 ; rcpp:remainingQuantity 240.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 12000.0 ; rcpp:cumulativeAmount 12000.0 ; rcpp:remainingAmount 48000.0.
+ex:PR-F a rcpp:ProgressPaymentItem ; rcpp:itemName "거푸집 3회" ; rcpp:representsCostItem ex:Formwork ; rcpp:usesUnit rcpp:SquareMetre ; rcpp:contractQuantity 300.0 ; rcpp:contractUnitPrice 200.0 ; rcpp:contractAmount 60000.0 ; rcpp:previousCumulativeQuantity 60.0 ; rcpp:currentQuantity 30.0 ; rcpp:cumulativeQuantity 90.0 ; rcpp:remainingQuantity 210.0 ; rcpp:previousCumulativeAmount 12000.0 ; rcpp:currentAmount 6000.0 ; rcpp:cumulativeAmount 18000.0 ; rcpp:remainingAmount 42000.0; rcpp:contributesCurrentAmountTo ex:PS-F .
+ex:CS-F a rcpp:ContractSummaryItem ; rcpp:itemName "거푸집 계약집계" ; rcpp:belongsToWorkCategory rcpp:FormworkWork ; rcpp:contractAmount 60000.0 .
+ex:PS-F a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "거푸집 기성집계" ; rcpp:belongsToWorkCategory rcpp:FormworkWork ; rcpp:currentAmount 6000.0 .
+
+ex:QB-S a rcpp:CalculatedQuantityItem ; rcpp:itemName "동바리 산출" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:calculatedQuantity 400.0 .
+ex:CT-S a rcpp:ContractItem ; rcpp:itemName "동바리 계약" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:contractQuantity 400.0 ; rcpp:contractUnitPrice 100.0 ; rcpp:contractAmount 40000.0.
+ex:WD-S a rcpp:WorkCategoryDetailItem ; rcpp:itemName "동바리 상세" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:contractAmount 40000.0; rcpp:contributesContractAmountTo ex:CS-S .
+ex:PV-S a rcpp:ProgressPaymentItem ; rcpp:itemName "동바리 2회" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:contractQuantity 400.0 ; rcpp:contractUnitPrice 100.0 ; rcpp:contractAmount 40000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 80.0 ; rcpp:cumulativeQuantity 80.0 ; rcpp:remainingQuantity 320.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 8000.0 ; rcpp:cumulativeAmount 8000.0 ; rcpp:remainingAmount 32000.0.
+ex:PR-S a rcpp:ProgressPaymentItem ; rcpp:itemName "동바리 3회" ; rcpp:representsCostItem ex:Shoring ; rcpp:usesUnit rcpp:CubicMetreSpace ; rcpp:contractQuantity 400.0 ; rcpp:contractUnitPrice 100.0 ; rcpp:contractAmount 40000.0 ; rcpp:previousCumulativeQuantity 80.0 ; rcpp:currentQuantity 40.0 ; rcpp:cumulativeQuantity 120.0 ; rcpp:remainingQuantity 280.0 ; rcpp:previousCumulativeAmount 8000.0 ; rcpp:currentAmount 4000.0 ; rcpp:cumulativeAmount 12000.0 ; rcpp:remainingAmount 28000.0; rcpp:contributesCurrentAmountTo ex:PS-S .
+ex:CS-S a rcpp:ContractSummaryItem ; rcpp:itemName "동바리 계약집계" ; rcpp:belongsToWorkCategory rcpp:ShoringWork ; rcpp:contractAmount 40000.0 .
+ex:PS-S a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "동바리 기성집계" ; rcpp:belongsToWorkCategory rcpp:ShoringWork ; rcpp:currentAmount 4000.0 .
+
+ex:WD-C rcpp:contractQuantity 200.0 ; rcpp:contractUnitPrice 500.0 .
+ex:WD-F rcpp:contractQuantity 300.0 ; rcpp:contractUnitPrice 200.0 .
+ex:WD-S rcpp:contractQuantity 400.0 ; rcpp:contractUnitPrice 100.0 .
+
+# 일반 대응 관계와 함께, 서류 간 전달 의미를 명시적으로 기록한다.
+ex:QB-R10 rcpp:providesCalculatedQuantityTo ex:CT-R10 .
+ex:QB-R16 rcpp:providesCalculatedQuantityTo ex:CT-R16 .
+ex:QB-R16-2 rcpp:providesCalculatedQuantityTo ex:CT-R16 .
+ex:QB-C rcpp:providesCalculatedQuantityTo ex:CT-C .
+ex:QB-F rcpp:providesCalculatedQuantityTo ex:CT-F .
+ex:QB-S rcpp:providesCalculatedQuantityTo ex:CT-S .
+ex:CT-R10 rcpp:providesContractQuantityTo ex:WD-R10 ; rcpp:providesContractUnitPriceTo ex:WD-R10 ; rcpp:providesContractAmountTo ex:WD-R10 ; rcpp:providesContractQuantityToProgressPaymentItem ex:PV-R10, ex:PR-R10 ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-R10, ex:PR-R10 ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-R10, ex:PR-R10 .
+ex:CT-R16 rcpp:providesContractQuantityTo ex:WD-R16 ; rcpp:providesContractUnitPriceTo ex:WD-R16 ; rcpp:providesContractAmountTo ex:WD-R16 ; rcpp:providesContractQuantityToProgressPaymentItem ex:PV-R16, ex:PR-R16 ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-R16, ex:PR-R16 ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-R16, ex:PR-R16 .
+ex:CT-C rcpp:providesContractQuantityTo ex:WD-C ; rcpp:providesContractUnitPriceTo ex:WD-C ; rcpp:providesContractAmountTo ex:WD-C ; rcpp:providesContractQuantityToProgressPaymentItem ex:PV-C, ex:PR-C ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-C, ex:PR-C ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-C, ex:PR-C .
+ex:CT-F rcpp:providesContractQuantityTo ex:WD-F ; rcpp:providesContractUnitPriceTo ex:WD-F ; rcpp:providesContractAmountTo ex:WD-F ; rcpp:providesContractQuantityToProgressPaymentItem ex:PV-F, ex:PR-F ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-F, ex:PR-F ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-F, ex:PR-F .
+ex:CT-S rcpp:providesContractQuantityTo ex:WD-S ; rcpp:providesContractUnitPriceTo ex:WD-S ; rcpp:providesContractAmountTo ex:WD-S ; rcpp:providesContractQuantityToProgressPaymentItem ex:PV-S, ex:PR-S ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-S, ex:PR-S ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-S, ex:PR-S .
+ex:PV-R10 rcpp:providesCumulativeValuesTo ex:PR-R10 .
+ex:PV-R16 rcpp:providesCumulativeValuesTo ex:PR-R16 .
+ex:PV-C rcpp:providesCumulativeValuesTo ex:PR-C .
+ex:PV-F rcpp:providesCumulativeValuesTo ex:PR-F .
+ex:PV-S rcpp:providesCumulativeValuesTo ex:PR-S .
+ex:QuantityDoc rcpp:containsItem ex:QB-R10, ex:QB-R16, ex:QB-R16-2, ex:QB-C, ex:QB-F, ex:QB-S .
+ex:ContractDoc rcpp:containsItem ex:CT-R10, ex:CT-R16, ex:CT-C, ex:CT-F, ex:CT-S .
+ex:CostDoc rcpp:containsItem ex:CI-R10, ex:CI-R16, ex:CI-C, ex:CI-F, ex:CI-S .
+ex:DetailDoc rcpp:containsItem ex:WD-R10, ex:WD-R16, ex:WD-C, ex:WD-F, ex:WD-S .
+ex:ContractSummaryDoc rcpp:containsItem ex:CS-R, ex:CS-C, ex:CS-F, ex:CS-S .
+ex:PaymentDocR2 rcpp:containsItem ex:PV-R10, ex:PV-R16, ex:PV-C, ex:PV-F, ex:PV-S .
+ex:PaymentDocR3 rcpp:containsItem ex:PR-R10, ex:PR-R16, ex:PR-C, ex:PR-F, ex:PR-S, ex:PS-R, ex:PS-C, ex:PS-F, ex:PS-S .
+
+# 철근 재료비항목 end-to-end 계보
+ex:QB-RM10 a rcpp:CalculatedQuantityItem ; rcpp:itemName "철근재료 D10 산출" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:calculatedQuantity 20.0 ; rcpp:providesCalculatedQuantityTo ex:CT-RM10 .
+ex:CT-RM10 a rcpp:ContractItem ; rcpp:itemName "철근재료 D10 계약" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 20.0 ; rcpp:contractUnitPrice 800.0 ; rcpp:contractAmount 16000.0 ;
+ rcpp:providesContractQuantityTo ex:WD-RM10 ; rcpp:providesContractUnitPriceTo ex:WD-RM10 ; rcpp:providesContractAmountTo ex:WD-RM10 ;
+ rcpp:providesContractQuantityToProgressPaymentItem ex:PV-RM10, ex:PR-RM10 ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-RM10, ex:PR-RM10 ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-RM10, ex:PR-RM10 .
+ex:CI-RM10 a rcpp:CostCalculationItem ; rcpp:itemName "철근재료 D10 원가계산" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:materialUnitCost 800.0 ; rcpp:laborUnitCost 0.0 ; rcpp:expenseUnitCost 0.0 ; rcpp:calculatedUnitPrice 800.0 .
+ex:WD-RM10 a rcpp:WorkCategoryDetailItem ; rcpp:itemName "철근재료 D10 상세" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 20.0 ; rcpp:contractUnitPrice 800.0 ; rcpp:contractAmount 16000.0 ; rcpp:contributesContractAmountTo ex:CS-RM .
+ex:PV-RM10 a rcpp:ProgressPaymentItem ; rcpp:itemName "철근재료 D10 2회 기성" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 20.0 ; rcpp:contractUnitPrice 800.0 ; rcpp:contractAmount 16000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 4.0 ; rcpp:cumulativeQuantity 4.0 ; rcpp:remainingQuantity 16.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 3200.0 ; rcpp:cumulativeAmount 3200.0 ; rcpp:remainingAmount 12800.0 ; rcpp:providesCumulativeValuesTo ex:PR-RM10 .
+ex:PR-RM10 a rcpp:ProgressPaymentItem ; rcpp:itemName "철근재료 D10 3회 기성" ; rcpp:representsCostItem ex:RebarMaterialD10 ; rcpp:usesUnit rcpp:Tonne ; rcpp:contractQuantity 20.0 ; rcpp:contractUnitPrice 800.0 ; rcpp:contractAmount 16000.0 ; rcpp:previousCumulativeQuantity 4.0 ; rcpp:currentQuantity 2.0 ; rcpp:cumulativeQuantity 6.0 ; rcpp:remainingQuantity 14.0 ; rcpp:previousCumulativeAmount 3200.0 ; rcpp:currentAmount 1600.0 ; rcpp:cumulativeAmount 4800.0 ; rcpp:remainingAmount 11200.0 ; rcpp:contributesCurrentAmountTo ex:PS-RM .
+ex:CS-RM a rcpp:ContractSummaryItem ; rcpp:itemName "철근재료 계약집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:contractAmount 16000.0 .
+ex:PS-RM a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "철근재료 기성집계" ; rcpp:belongsToWorkCategory rcpp:RebarWork ; rcpp:currentAmount 1600.0 .
+
+# 레디믹스트콘크리트 재료비항목 end-to-end 계보
+ex:QB-RMC a rcpp:CalculatedQuantityItem ; rcpp:itemName "레디믹스트콘크리트 산출" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:calculatedQuantity 30.0 ; rcpp:providesCalculatedQuantityTo ex:CT-RMC .
+ex:CT-RMC a rcpp:ContractItem ; rcpp:itemName "레디믹스트콘크리트 계약" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 30.0 ; rcpp:contractUnitPrice 400.0 ; rcpp:contractAmount 12000.0 ;
+ rcpp:providesContractQuantityTo ex:WD-RMC ; rcpp:providesContractUnitPriceTo ex:WD-RMC ; rcpp:providesContractAmountTo ex:WD-RMC ;
+ rcpp:providesContractQuantityToProgressPaymentItem ex:PV-RMC, ex:PR-RMC ; rcpp:providesContractUnitPriceToProgressPaymentItem ex:PV-RMC, ex:PR-RMC ; rcpp:providesContractAmountToProgressPaymentItem ex:PV-RMC, ex:PR-RMC .
+ex:CI-RMC a rcpp:CostCalculationItem ; rcpp:itemName "레디믹스트콘크리트 원가계산" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:materialUnitCost 400.0 ; rcpp:laborUnitCost 0.0 ; rcpp:expenseUnitCost 0.0 ; rcpp:calculatedUnitPrice 400.0 .
+ex:WD-RMC a rcpp:WorkCategoryDetailItem ; rcpp:itemName "레디믹스트콘크리트 상세" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 30.0 ; rcpp:contractUnitPrice 400.0 ; rcpp:contractAmount 12000.0 ; rcpp:contributesContractAmountTo ex:CS-RMC .
+ex:PV-RMC a rcpp:ProgressPaymentItem ; rcpp:itemName "레디믹스트콘크리트 2회 기성" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 30.0 ; rcpp:contractUnitPrice 400.0 ; rcpp:contractAmount 12000.0 ; rcpp:previousCumulativeQuantity 0.0 ; rcpp:currentQuantity 6.0 ; rcpp:cumulativeQuantity 6.0 ; rcpp:remainingQuantity 24.0 ; rcpp:previousCumulativeAmount 0.0 ; rcpp:currentAmount 2400.0 ; rcpp:cumulativeAmount 2400.0 ; rcpp:remainingAmount 9600.0 ; rcpp:providesCumulativeValuesTo ex:PR-RMC .
+ex:PR-RMC a rcpp:ProgressPaymentItem ; rcpp:itemName "레디믹스트콘크리트 3회 기성" ; rcpp:representsCostItem ex:ReadyMixedConcrete ; rcpp:usesUnit rcpp:CubicMetre ; rcpp:contractQuantity 30.0 ; rcpp:contractUnitPrice 400.0 ; rcpp:contractAmount 12000.0 ; rcpp:previousCumulativeQuantity 6.0 ; rcpp:currentQuantity 3.0 ; rcpp:cumulativeQuantity 9.0 ; rcpp:remainingQuantity 21.0 ; rcpp:previousCumulativeAmount 2400.0 ; rcpp:currentAmount 1200.0 ; rcpp:cumulativeAmount 3600.0 ; rcpp:remainingAmount 8400.0 ; rcpp:contributesCurrentAmountTo ex:PS-RMC .
+ex:CS-RMC a rcpp:ContractSummaryItem ; rcpp:itemName "레디믹스트콘크리트 계약집계" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:contractAmount 12000.0 .
+ex:PS-RMC a rcpp:ProgressPaymentSummaryItem ; rcpp:itemName "레디믹스트콘크리트 기성집계" ; rcpp:belongsToWorkCategory rcpp:ConcreteWork ; rcpp:currentAmount 1200.0 .
+
+ex:QuantityDoc rcpp:containsItem ex:QB-RM10, ex:QB-RMC .
+ex:ContractDoc rcpp:containsItem ex:CT-RM10, ex:CT-RMC .
+ex:CostDoc rcpp:containsItem ex:CI-RM10, ex:CI-RMC .
+ex:DetailDoc rcpp:containsItem ex:WD-RM10, ex:WD-RMC .
+ex:ContractSummaryDoc rcpp:containsItem ex:CS-RM, ex:CS-RMC .
+ex:PaymentDocR2 rcpp:containsItem ex:PV-RM10, ex:PV-RMC .
+ex:PaymentDocR3 rcpp:containsItem ex:PR-RM10, ex:PS-RM, ex:PR-RMC, ex:PS-RMC .

@@ -2,13 +2,29 @@
 !/.gitignore
 !/README.md
 !/requirements.txt
+!/SPECIFICATION.md
 !/KO/
 
 /KO/*
-!/KO/ontology/
+!/KO/RDF/
+!/KO/RDFS/
+!/KO/OWL2/
 !/KO/visualization/
+
+/KO/OWL/
+/KO/OWL2/*
+!/KO/OWL2/rcpp-owl-final.ttl
+!/KO/OWL2/rcpp-owl-inferred.ttl
+!/KO/OWL2/axioms.md
+!/KO/OWL2/OWL2_VALIDATION_REPORT.md
+!/KO/OWL2/validate_owl2.py
+!/KO/OWL2/owl2-shapes.ttl
+/KO/RDFS/LOT_Artifacts/
+/KO/RDFS/**/*.md
+!/KO/RDFS/ONTOLOGY_SPECIFICATION.md
+!/KO/RDFS/RDFS_VALIDATION_REPORT.md
 
 **/__pycache__/
 *.py[cod]
 
-/KO/ontology/generate_specification.py
+/KO/RDFS/generate_specification.py

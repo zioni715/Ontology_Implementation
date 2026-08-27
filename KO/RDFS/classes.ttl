@@ -1,4 +1,4 @@
-@prefix rcpp: <https://example.org/rcpp#> .
+@prefix rcpp: <https://zioni715.github.io/ontology/rcpp#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 # 업무 맥락
@@ -11,8 +11,8 @@ rcpp:EvidenceDocument a rdfs:Class ; rdfs:subClassOf rcpp:ProgressDocument ; rdf
 rcpp:ProgressPaymentStatement a rdfs:Class ; rdfs:subClassOf rcpp:OutputDocument ; rdfs:label "공사기성부분내역서"@ko ; rdfs:comment "회차별 기성수량과 기성금액을 산정해 제시하는 유일한 산출서류"@ko .
 rcpp:ContractStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "계약내역서"@ko ; rdfs:comment "확정된 계약수량·계약단가·계약금액을 제공하는 근거서류"@ko .
 rcpp:CostCalculationStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "원가계산서"@ko ; rdfs:comment "비용항목의 원가 구성과 산정금액을 제공하는 근거서류"@ko .
-rcpp:WorkTypeSummaryStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "공종별집계표"@ko ; rdfs:comment "공종별 상세 비용을 합산해 제시하는 근거서류"@ko .
-rcpp:WorkTypeDetailStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "공종별내역서"@ko ; rdfs:comment "공종별 비용항목의 수량·단가·금액을 제시하는 근거서류"@ko .
+rcpp:WorkCategorySummaryStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "공종별집계표"@ko ; rdfs:comment "공종별 상세 비용을 합산해 제시하는 근거서류"@ko .
+rcpp:WorkCategoryDetailStatement a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "공종별내역서"@ko ; rdfs:comment "공종별 비용항목의 수량·단가·금액을 제시하는 근거서류"@ko .
 rcpp:QuantityCalculationSheet a rdfs:Class ; rdfs:subClassOf rcpp:EvidenceDocument ; rdfs:label "수량산출서"@ko ; rdfs:comment "계약수량의 산출 근거를 제공하는 근거서류"@ko .
 
 # 서류 항목
@@ -21,12 +21,11 @@ rcpp:DetailItem a rdfs:Class ; rdfs:subClassOf rcpp:DocumentItem ; rdfs:label "�
 rcpp:CalculatedQuantityItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "수량산출항목"@ko ; rdfs:comment "수량산출서에서 계약수량의 근거가 되는 산출수량 항목"@ko .
 rcpp:ContractItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "계약항목"@ko ; rdfs:comment "계약수량·계약단가·계약금액을 제공하는 계약내역서 항목"@ko .
 rcpp:CostCalculationItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "원가계산항목"@ko ; rdfs:comment "원가계산서에서 비용 산정 근거를 제공하는 항목"@ko .
-rcpp:WorkTypeDetailItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "공종별내역항목"@ko ; rdfs:comment "공종별내역서에 수량·단가·금액을 나타내는 항목"@ko .
+rcpp:WorkCategoryDetailItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "공종별내역항목"@ko ; rdfs:comment "공종별내역서에 수량·단가·금액을 나타내는 항목"@ko .
 rcpp:SummaryItem a rdfs:Class ; rdfs:subClassOf rcpp:DocumentItem ; rdfs:label "집계항목"@ko ; rdfs:comment "계약 또는 기성 상세항목의 금액을 동일 공종별로 합산한 항목"@ko .
 rcpp:ContractSummaryItem a rdfs:Class ; rdfs:subClassOf rcpp:SummaryItem ; rdfs:label "계약집계항목"@ko ; rdfs:comment "공종별내역항목의 계약금액을 공종별로 합산한 공종별집계표 항목"@ko .
-rcpp:ProgressSummaryItem a rdfs:Class ; rdfs:subClassOf rcpp:SummaryItem ; rdfs:label "기성집계항목"@ko ; rdfs:comment "기성금액항목의 금회금액을 공종별로 합산한 공사기성부분내역서 항목"@ko .
-rcpp:CurrentProgressQuantityItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "금회기성수량항목"@ko ; rdfs:comment "공사기성부분내역서 안에서 현재 회차의 확정수량을 나타내는 항목"@ko .
-rcpp:ProgressItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "기성금액항목"@ko ; rdfs:comment "공사기성부분내역서에서 전회·금회·누계·잔여 수량과 금액을 산정하는 항목"@ko .
+rcpp:ProgressPaymentSummaryItem a rdfs:Class ; rdfs:subClassOf rcpp:SummaryItem ; rdfs:label "기성집계항목"@ko ; rdfs:comment "기성금액항목의 금회금액을 공종별로 합산한 공사기성부분내역서 항목"@ko .
+rcpp:ProgressPaymentItem a rdfs:Class ; rdfs:subClassOf rcpp:DetailItem ; rdfs:label "기성내역항목"@ko ; rdfs:comment "공사기성부분내역서에서 전회·금회·누계·잔여 수량과 금액을 산정하는 항목"@ko .
 
 # 철근콘크리트 공종 범위
 rcpp:CostItem a rdfs:Class ; rdfs:label "비용항목"@ko ; rdfs:comment "서류별 항목이 공통으로 나타내는 표준 비용 대상"@ko .
@@ -35,7 +34,7 @@ rcpp:RebarCostItem a rdfs:Class ; rdfs:subClassOf rcpp:CostItem ; rdfs:label "�
 rcpp:RebarMaterialCostItem a rdfs:Class ; rdfs:subClassOf rcpp:RebarCostItem ; rdfs:label "철근 재료비항목"@ko ; rdfs:comment "강종과 지름으로 구분하는 철근 재료 단가 항목"@ko .
 rcpp:RebarFabricationAssemblyCostItem a rdfs:Class ; rdfs:subClassOf rcpp:RebarCostItem ; rdfs:label "철근 가공·조립비항목"@ko ; rdfs:comment "가공·조립 유형과 가공 장소로 구분하는 철근 시공 단가 항목"@ko .
 rcpp:ConcreteCostItem a rdfs:Class ; rdfs:subClassOf rcpp:CostItem ; rdfs:label "콘크리트 비용항목"@ko ; rdfs:comment "레미콘 재료와 콘크리트 타설 단가를 구분하는 비용항목"@ko .
-rcpp:ReadyMixedConcreteCostItem a rdfs:Class ; rdfs:subClassOf rcpp:ConcreteCostItem ; rdfs:label "레디믹스트콘크리트 재료비항목"@ko ; rdfs:comment "골재크기·강도·슬럼프로 구분하는 레디믹스트콘크리트 재료 단가 항목"@ko .
+rcpp:ReadyMixedConcreteMaterialCostItem a rdfs:Class ; rdfs:subClassOf rcpp:ConcreteCostItem ; rdfs:label "레디믹스트콘크리트 재료비항목"@ko ; rdfs:comment "골재크기·강도·슬럼프로 구분하는 레디믹스트콘크리트 재료 단가 항목"@ko .
 rcpp:ConcretePlacementCostItem a rdfs:Class ; rdfs:subClassOf rcpp:ConcreteCostItem ; rdfs:label "콘크리트 타설비항목"@ko ; rdfs:comment "타설방법과 구조물 유형으로 구분하는 콘크리트 시공 단가 항목"@ko .
 rcpp:FormworkCostItem a rdfs:Class ; rdfs:subClassOf rcpp:CostItem ; rdfs:label "거푸집 비용항목"@ko ; rdfs:comment "거푸집 설치·해체 단가를 구분하는 비용항목"@ko .
 rcpp:ShoringCostItem a rdfs:Class ; rdfs:subClassOf rcpp:CostItem ; rdfs:label "동바리 비용항목"@ko ; rdfs:comment "동바리 설치·해체 단가를 구분하는 비용항목"@ko .

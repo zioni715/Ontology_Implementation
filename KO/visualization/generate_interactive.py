@@ -13,14 +13,14 @@ from rdflib import DCTERMS, RDF, RDFS, Graph, Namespace, URIRef
 
 ROOT = Path(__file__).resolve().parents[1]
 ONTOLOGY_FILES = tuple(
-    ROOT / "ontology" / name
+    ROOT / "RDFS" / name
     for name in ("schema.ttl", "classes.ttl", "properties.ttl", "code-lists.ttl")
 )
 OUTPUT_FILE = Path(__file__).resolve().parent / "interactive.html"
-EXAMPLES_FILE = ROOT / "ontology" / "examples.ttl"
+EXAMPLES_FILE = ROOT / "RDFS" / "examples.ttl"
 XSD = "http://www.w3.org/2001/XMLSchema#"
-RCPP = Namespace("https://example.org/rcpp#")
-EX = Namespace("https://example.org/rcpp/example#")
+RCPP = Namespace("https://zioni715.github.io/ontology/rcpp#")
+EX = Namespace("https://zioni715.github.io/ontology/rcpp/example#")
 
 
 def local_name(value: object) -> str:
@@ -48,7 +48,7 @@ def build_data(graph: Graph) -> dict[str, object]:
         "WorkCategory",
         "RebarMaterialCostItem",
         "RebarFabricationAssemblyCostItem",
-        "ReadyMixedConcreteCostItem",
+        "ReadyMixedConcreteMaterialCostItem",
         "ConcretePlacementCostItem",
     }
     all_class_uris = sorted(set(graph.subjects(RDF.type, RDFS.Class)), key=str)
@@ -62,7 +62,7 @@ def build_data(graph: Graph) -> dict[str, object]:
         ),
         RCPP.ConcreteCostItem: (
             RCPP.ConcreteCostItem,
-            RCPP.ReadyMixedConcreteCostItem,
+            RCPP.ReadyMixedConcreteMaterialCostItem,
             RCPP.ConcretePlacementCostItem,
         ),
     }
@@ -126,10 +126,9 @@ def build_data(graph: Graph) -> dict[str, object]:
                 if property_name in {
                     "providesCalculatedQuantityTo", "providesContractQuantityTo",
                     "providesContractUnitPriceTo", "providesContractAmountTo",
-                    "providesCostBasisTo", "providesCurrentQuantityTo",
-                    "providesContractUnitPriceToProgress", "providesContractQuantityToProgress",
-                    "providesContractAmountToProgress", "providesPreviousTotalTo",
-                    "aggregatedContractInto", "aggregatedProgressInto",
+                    "providesContractUnitPriceToProgressPaymentItem", "providesContractQuantityToProgressPaymentItem",
+                    "providesContractAmountToProgressPaymentItem", "providesCumulativeValuesTo",
+                    "contributesContractAmountTo", "contributesCurrentAmountTo",
                 }:
                     kind = "flow"
                 elif property_name == "containsItem":
@@ -186,11 +185,10 @@ def build_data(graph: Graph) -> dict[str, object]:
         ("QuantityCalculationSheet", "CalculatedQuantityItem"),
         ("ContractStatement", "ContractItem"),
         ("CostCalculationStatement", "CostCalculationItem"),
-        ("WorkTypeDetailStatement", "WorkTypeDetailItem"),
-        ("WorkTypeSummaryStatement", "ContractSummaryItem"),
-        ("ProgressPaymentStatement", "CurrentProgressQuantityItem"),
-        ("ProgressPaymentStatement", "ProgressItem"),
-        ("ProgressPaymentStatement", "ProgressSummaryItem"),
+        ("WorkCategoryDetailStatement", "WorkCategoryDetailItem"),
+        ("WorkCategorySummaryStatement", "ContractSummaryItem"),
+        ("ProgressPaymentStatement", "ProgressPaymentItem"),
+        ("ProgressPaymentStatement", "ProgressPaymentSummaryItem"),
     )
     for document, item in document_item_constraints:
         edges.append({
@@ -203,7 +201,7 @@ def build_data(graph: Graph) -> dict[str, object]:
         "QuantityDoc", "ContractDoc", "CostDoc", "DetailDoc",
         "ContractSummaryDoc", "PaymentDocR2", "PaymentDocR3",
         "QB-R10", "CT-R10", "CI-R10", "WD-R10", "CS-R",
-        "PQ2-R10", "PV-R10", "PQ3-R10", "PR-R10", "PS-R",
+        "PV-R10", "PR-R10", "PS-R",
     )
     lineage_uris = {EX[value] for value in lineage_ids}
     for uri in sorted(lineage_uris, key=str):
@@ -229,18 +227,16 @@ def build_data(graph: Graph) -> dict[str, object]:
 
     lineage_properties = {
         RCPP.containsItem: ("constraint", "문서 포함"),
-        RCPP.providesCalculatedQuantityTo: ("flow", "calculatedQuantity → contractQuantity · 50 t"),
-        RCPP.providesContractQuantityTo: ("flow", "contractQuantity → contractQuantity · 50 t"),
-        RCPP.providesContractUnitPriceTo: ("flow", "contractUnitPrice → contractUnitPrice · 1,000"),
-        RCPP.providesContractAmountTo: ("flow", "contractAmount → contractAmount · 50,000"),
-        RCPP.providesCostBasisTo: ("flow", "원가산정 근거 제공 · 속성 매핑 미확정"),
-        RCPP.providesCurrentQuantityTo: ("flow", "currentQuantity → currentQuantity"),
-        RCPP.providesContractQuantityToProgress: ("flow", "contractQuantity → contractQuantity · 50 t"),
-        RCPP.providesContractUnitPriceToProgress: ("flow", "contractUnitPrice → contractUnitPrice · 1,000"),
-        RCPP.providesContractAmountToProgress: ("flow", "contractAmount → contractAmount · 50,000"),
-        RCPP.providesPreviousTotalTo: ("rollover", "cumulativeQuantity/Amount → previousQuantity/Amount · 10 t / 10,000"),
-        RCPP.aggregatedContractInto: ("aggregate", "contractAmount 집계 · 50,000"),
-        RCPP.aggregatedProgressInto: ("aggregate", "currentAmount 집계 · 5,000"),
+        RCPP.providesCalculatedQuantityTo: ("flow", "산출수량 → 계약수량 · 50 t"),
+        RCPP.providesContractQuantityTo: ("flow", "계약수량 → 공종별내역 계약수량 · 50 t"),
+        RCPP.providesContractUnitPriceTo: ("flow", "계약단가 → 공종별내역 계약단가 · 1,000"),
+        RCPP.providesContractAmountTo: ("flow", "계약금액 → 공종별내역 계약금액 · 50,000"),
+        RCPP.providesContractQuantityToProgressPaymentItem: ("flow", "계약수량 → 기성내역 계약수량 · 50 t"),
+        RCPP.providesContractUnitPriceToProgressPaymentItem: ("flow", "계약단가 → 기성내역 계약단가 · 1,000"),
+        RCPP.providesContractAmountToProgressPaymentItem: ("flow", "계약금액 → 기성내역 계약금액 · 50,000"),
+        RCPP.providesCumulativeValuesTo: ("rollover", "이전 누계 → 현재 전회값 · 10 t / 10,000"),
+        RCPP.contributesContractAmountTo: ("aggregate", "계약금액 → 공종별 계약집계 · 50,000"),
+        RCPP.contributesCurrentAmountTo: ("aggregate", "금회금액 → 공종별 기성집계 · 5,000"),
     }
     for prop, (kind, label) in lineage_properties.items():
         for source, target in sorted(examples.subject_objects(prop), key=lambda pair: (str(pair[0]), str(pair[1]))):
@@ -279,12 +275,12 @@ const byId=new Map(data.nodes.map(n=>[n.id,n])); let selected=null, transform={x
 const svg=document.getElementById('graph'), viewport=document.getElementById('viewport'), stage=document.getElementById('stage');
 const W=1700,H=1000; svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
 const views={
-lineage:{ids:['QuantityDoc','ContractDoc','CostDoc','DetailDoc','ContractSummaryDoc','PaymentDocR2','PaymentDocR3','QB-R10','CT-R10','CI-R10','WD-R10','CS-R','PQ2-R10','PV-R10','PQ3-R10','PR-R10','PS-R'],pos:{QuantityDoc:[100,90],'QB-R10':[100,260],ContractDoc:[370,90],'CT-R10':[370,260],CostDoc:[370,650],'CI-R10':[370,500],DetailDoc:[700,90],'WD-R10':[700,260],ContractSummaryDoc:[1010,90],'CS-R':[1010,260],PaymentDocR2:[1040,500],'PQ2-R10':[900,650],'PV-R10':[1160,650],PaymentDocR3:[1380,500],'PQ3-R10':[1260,820],'PR-R10':[1450,700],'PS-R':[1580,820]}},
-domain:{ids:['CalculatedQuantityItem','ContractItem','CostCalculationItem','WorkTypeDetailItem','ContractSummaryItem','CurrentProgressQuantityItem','ProgressItem','ProgressSummaryItem'],pos:{CalculatedQuantityItem:[140,250],ContractItem:[430,250],CostCalculationItem:[430,650],WorkTypeDetailItem:[760,400],ContractSummaryItem:[1080,650],CurrentProgressQuantityItem:[820,100],ProgressItem:[1120,250],ProgressSummaryItem:[1430,250]}},
-documents:{ids:['QuantityCalculationSheet','CalculatedQuantityItem','ContractStatement','ContractItem','CostCalculationStatement','CostCalculationItem','WorkTypeDetailStatement','WorkTypeDetailItem','WorkTypeSummaryStatement','ContractSummaryItem','ProgressPaymentStatement','CurrentProgressQuantityItem','ProgressItem','ProgressSummaryItem'],pos:{QuantityCalculationSheet:[120,120],CalculatedQuantityItem:[120,330],ContractStatement:[390,120],ContractItem:[390,330],CostCalculationStatement:[650,120],CostCalculationItem:[650,330],WorkTypeDetailStatement:[910,120],WorkTypeDetailItem:[910,330],WorkTypeSummaryStatement:[1170,120],ContractSummaryItem:[1170,330],ProgressPaymentStatement:[1370,600],CurrentProgressQuantityItem:[1100,820],ProgressItem:[1370,820],ProgressSummaryItem:[1600,820]}},
-classes:{ids:data.nodes.filter(n=>n.nodeType==='class').map(n=>n.id),pos:{ProgressDocument:[150,160],OutputDocument:[380,100],EvidenceDocument:[380,280],ProgressPaymentStatement:[650,100],ContractStatement:[650,200],CostCalculationStatement:[650,280],WorkTypeSummaryStatement:[650,360],WorkTypeDetailStatement:[650,440],QuantityCalculationSheet:[650,520],DocumentItem:[850,160],DetailItem:[1080,140],SummaryItem:[1080,400],CalculatedQuantityItem:[1320,70],ContractItem:[1320,140],CostCalculationItem:[1320,210],WorkTypeDetailItem:[1320,280],CurrentProgressQuantityItem:[1320,350],ProgressItem:[1320,420],ContractSummaryItem:[1320,520],ProgressSummaryItem:[1320,610],CostItem:[850,720],RebarCostItem:[1120,680],ConcreteCostItem:[1120,760],FormworkCostItem:[1390,680],ShoringCostItem:[1390,760],ProgressPaymentRound:[150,650],Unit:[380,760]}},
+lineage:{ids:['QuantityDoc','ContractDoc','CostDoc','DetailDoc','ContractSummaryDoc','PaymentDocR2','PaymentDocR3','QB-R10','CT-R10','CI-R10','WD-R10','CS-R','PV-R10','PR-R10','PS-R'],pos:{QuantityDoc:[100,90],'QB-R10':[100,260],ContractDoc:[370,90],'CT-R10':[370,260],CostDoc:[370,650],'CI-R10':[370,500],DetailDoc:[700,90],'WD-R10':[700,260],ContractSummaryDoc:[1010,90],'CS-R':[1010,260],PaymentDocR2:[1040,500],'PV-R10':[1160,650],PaymentDocR3:[1380,500],'PR-R10':[1450,700],'PS-R':[1580,820]}},
+domain:{ids:['CalculatedQuantityItem','ContractItem','CostCalculationItem','WorkCategoryDetailItem','ContractSummaryItem','ProgressPaymentItem','ProgressPaymentSummaryItem'],pos:{CalculatedQuantityItem:[140,250],ContractItem:[430,250],CostCalculationItem:[430,650],WorkCategoryDetailItem:[760,400],ContractSummaryItem:[1080,650],ProgressPaymentItem:[1120,250],ProgressPaymentSummaryItem:[1430,250]}},
+documents:{ids:['QuantityCalculationSheet','CalculatedQuantityItem','ContractStatement','ContractItem','CostCalculationStatement','CostCalculationItem','WorkCategoryDetailStatement','WorkCategoryDetailItem','WorkCategorySummaryStatement','ContractSummaryItem','ProgressPaymentStatement','ProgressPaymentItem','ProgressPaymentSummaryItem'],pos:{QuantityCalculationSheet:[120,120],CalculatedQuantityItem:[120,330],ContractStatement:[390,120],ContractItem:[390,330],CostCalculationStatement:[650,120],CostCalculationItem:[650,330],WorkCategoryDetailStatement:[910,120],WorkCategoryDetailItem:[910,330],WorkCategorySummaryStatement:[1170,120],ContractSummaryItem:[1170,330],ProgressPaymentStatement:[1370,600],ProgressPaymentItem:[1370,820],ProgressPaymentSummaryItem:[1600,820]}},
+classes:{ids:data.nodes.filter(n=>n.nodeType==='class').map(n=>n.id),pos:{ProgressDocument:[150,160],OutputDocument:[380,100],EvidenceDocument:[380,280],ProgressPaymentStatement:[650,100],ContractStatement:[650,200],CostCalculationStatement:[650,280],WorkCategorySummaryStatement:[650,360],WorkCategoryDetailStatement:[650,440],QuantityCalculationSheet:[650,520],DocumentItem:[850,160],DetailItem:[1080,140],SummaryItem:[1080,400],CalculatedQuantityItem:[1320,70],ContractItem:[1320,140],CostCalculationItem:[1320,210],WorkCategoryDetailItem:[1320,280],ProgressPaymentItem:[1320,420],ContractSummaryItem:[1320,520],ProgressPaymentSummaryItem:[1320,610],CostItem:[850,720],RebarCostItem:[1120,680],ConcreteCostItem:[1120,760],FormworkCostItem:[1390,680],ShoringCostItem:[1390,760],ProgressPaymentRound:[150,650],Unit:[380,760]}},
 works:{ids:['ReinforcedConcreteWork','RebarWork','ConcreteWork','FormworkWork','ShoringWork'],pos:{ReinforcedConcreteWork:[700,180],RebarWork:[300,520],ConcreteWork:[570,520],FormworkWork:[840,520],ShoringWork:[1110,520]}},
-all:{ids:data.nodes.filter(n=>n.nodeType!=='instance').map(n=>n.id),pos:{ProgressDocument:[100,350],OutputDocument:[300,220],EvidenceDocument:[300,500],ProgressPaymentRound:[500,100],ProgressPaymentStatement:[500,220],ContractStatement:[500,390],CostCalculationStatement:[500,470],WorkTypeSummaryStatement:[500,550],WorkTypeDetailStatement:[500,630],QuantityCalculationSheet:[500,710],DocumentItem:[700,100],DetailItem:[700,240],CalculatedQuantityItem:[900,100],ContractItem:[900,210],CostCalculationItem:[900,320],WorkTypeDetailItem:[900,430],CurrentProgressQuantityItem:[900,540],ProgressItem:[900,650],SummaryItem:[700,790],ContractSummaryItem:[900,770],ProgressSummaryItem:[900,870],ReinforcedConcreteWork:[1260,100],RebarWork:[1210,250],ConcreteWork:[1210,390],FormworkWork:[1210,530],ShoringWork:[1210,670],CostItem:[1500,100],RebarCostItem:[1500,250],ConcreteCostItem:[1500,390],FormworkCostItem:[1500,530],ShoringCostItem:[1500,670],Unit:[1080,820]}}
+all:{ids:data.nodes.filter(n=>n.nodeType!=='instance').map(n=>n.id),pos:{ProgressDocument:[100,350],OutputDocument:[300,220],EvidenceDocument:[300,500],ProgressPaymentRound:[500,100],ProgressPaymentStatement:[500,220],ContractStatement:[500,390],CostCalculationStatement:[500,470],WorkCategorySummaryStatement:[500,550],WorkCategoryDetailStatement:[500,630],QuantityCalculationSheet:[500,710],DocumentItem:[700,100],DetailItem:[700,240],CalculatedQuantityItem:[900,100],ContractItem:[900,210],CostCalculationItem:[900,320],WorkCategoryDetailItem:[900,430],ProgressPaymentItem:[900,650],SummaryItem:[700,790],ContractSummaryItem:[900,770],ProgressPaymentSummaryItem:[900,870],ReinforcedConcreteWork:[1260,100],RebarWork:[1210,250],ConcreteWork:[1210,390],FormworkWork:[1210,530],ShoringWork:[1210,670],CostItem:[1500,100],RebarCostItem:[1500,250],ConcreteCostItem:[1500,390],FormworkCostItem:[1500,530],ShoringCostItem:[1500,670],Unit:[1080,820]}}
 };
 data.nodes.forEach((n,i)=>{n.x=100+(i%6)*210;n.y=100+Math.floor(i/6)*150});
 function el(tag,attrs={}){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e}
