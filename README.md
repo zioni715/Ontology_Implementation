@@ -72,7 +72,8 @@ python KO/RDFS/validate_examples.py
 python KO/RDFS/validate_invalid_examples.py
 python KO/OWL2/validate_owl2.py
 ```
-OWL 2 최종본은 Protégé의 HermiT reasoner로 일관성 검사를 수행하고 추론 결과를 `rcpp-owl-inferred.ttl`로 내보냈다. HermiT와 OWL 2 전용 SHACL 검증 결과는 [OWL 2 검증 보고서](KO/OWL2/OWL2_VALIDATION_REPORT.md)에 기록했다.
+OWL 2 최종본은 Protégé의 HermiT reasoner로 일관성 검사를 수행하고 추론 결과를 `rcpp-owl-inferred.ttl`로 내보냄
+HermiT와 OWL 2 전용 SHACL 검증 결과는 [OWL 2 검증 보고서](KO/OWL2/OWL2_VALIDATION_REPORT.md)에 기록
 
 검증 보고서:
 
